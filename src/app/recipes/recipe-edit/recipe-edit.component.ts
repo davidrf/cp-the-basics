@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
+import { FormGroup, FormControl, FormArray } from '@angular/forms';
 import { ActivatedRoute, Params } from '@angular/router';
 import { RecipeService } from '../recipe.service';
 
@@ -24,8 +24,6 @@ export class RecipeEditComponent implements OnInit {
       (params: Params) => {
         this.id = +params.id;
         this.editMode = params.id !== undefined;
-        console.log(params.id)
-        console.log(this.editMode)
         this.initForm();
       }
     );
@@ -34,12 +32,20 @@ export class RecipeEditComponent implements OnInit {
   private initForm() {
     const recipe = this.editMode
       ? this.recipeService.getRecipe(this.id)
-      : { name: '', imagePath: '', description: '' };
+      : { name: '', imagePath: '', description: '', ingredients: [] };
+
+    const ingredientFormGroups = recipe.ingredients.map(({ name, amount }) => {
+      return new FormGroup({
+        'name': new FormControl(name),
+        'amount': new FormControl(amount),
+      })
+    });
 
     this.recipeForm = new FormGroup({
       'name': new FormControl(recipe.name),
       'imagePath': new FormControl(recipe.imagePath),
       'description': new FormControl(recipe.description),
+      'ingredients': new FormArray(ingredientFormGroups),
     });
   }
 
